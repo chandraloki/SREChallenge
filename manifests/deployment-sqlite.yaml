@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+name: dumbkv-sqlite
+spec:
+replicas: 1
+selector:
+matchLabels:
+app: dumbkv
+template:
+metadata:
+labels:
+app: dumbkv
+spec:
+containers:
+- name: dumbkv
+image: ghcr.io/your-username/dumbkv:latest
+ports:
+- containerPort: 8000
+env:
+- name: DATABASE_LOCATION
+value: /data/dumbkvstore/dumbkv.db
+- name: DATABASE_TYPE
+value: sqlite
+volumeMounts:
+- name: data
+mountPath: /data/dumbkvstore
+readinessProbe:
+httpGet:
+path: /health
+port: 8000
+livenessProbe:
+httpGet:
+path: /health
+port: 8000
+volumes:
+- name: data
+persistentVolumeClaim:
+claimName: dumbkv-pvc
