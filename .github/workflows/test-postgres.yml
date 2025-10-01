@@ -1,0 +1,36 @@
+name: Test with Postgres
+
+on:
+pull_request:
+
+jobs:
+test-postgres:
+runs-on: ubuntu-latest
+services:
+postgres:
+image: postgres:15
+env:
+POSTGRES_PASSWORD: postgres
+ports:
+- 5432:5432
+options: >-
+--health-cmd="pg_isready -U postgres"
+--health-interval=10s
+--health-timeout=5s
+--health-retries=5
+
+steps:
+- uses: actions/checkout@v3
+- uses: actions/setup-python@v4
+with:
+python-version: '3.12'
+
+- name: Install uv
+run: pip install uv
+
+- name: Install dependencies
+run: uv sync
+
+
+- name: Run tests with Postgres
+run: uv run python -m pytest -v --database-location=postgres://postgres:postgres@localhost/postgres
